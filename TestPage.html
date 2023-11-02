@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Local Storage Test</title>
+</head>
+<body>
+    <h1>Test Local Storage</h1>
+
+    <label for="input1">Input 1:</label><br>
+    <input type="text" id="input1"><br>
+    <label for="input2">Input 2:</label><br>
+    <input type="text" id="input2"><br>
+
+    <button onclick="saveToLocalStorage()">Save to Local Storage</button>
+    <button onclick="loadFromLocalStorage()">Load from Local Storage</button>
+
+    <script>
+        function saveToLocalStorage() {
+            const input1 = document.getElementById('input1').value;
+            const input2 = document.getElementById('input2').value;
+
+            const data = {
+                input1: input1,
+                input2: input2,
+            };
+
+            localStorage.setItem('data', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const data = JSON.parse(localStorage.getItem('data'));
+
+            if(data) {
+                document.getElementById('input1').value = data.input1;
+                document.getElementById('input2').value = data.input2;
+            }
+        }
+    </script>
+</body>
+</html>

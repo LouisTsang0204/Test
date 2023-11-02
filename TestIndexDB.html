@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IndexedDB Test</title>
+    <script>
+        let db;
+
+        window.onload = function() {
+            let request = indexedDB.open('DB', 1);
+
+            request.onupgradeneeded = function(e) {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains('inputs')) {
+                    db.createObjectStore('inputs', { keyPath: 'id' });
+                }
+            };
+
+            request.onsuccess = function(e) { 
+                db = e.target.result;
+            };
+
+            request.onerror = function(e) {
+                console.log('Error opening db', e);
+            };
+        };
+
+        function saveToIndexedDB() {
+            let input1 = document.getElementById('input1').value;
+            let input2 = document.getElementById('input2').value;
+            let photo = document.getElementById('photo').files[0];
+
+            let tx = db.transaction(['inputs'], 'readwrite');
+            let store = tx.objectStore('inputs');
+
+            let item1 = {
+                id: 'input1',
+                value: input1
+            };
+
+            let item2 = {
+                id: 'input2',
+                value: input2
+            };
+
+            store.put(item1);
+            store.put(item2);
+
+            let reader = new FileReader();
+
+            reader.onloadend = function() {
+                let tx = db.transaction(['inputs'], 'readwrite');
+                let store = tx.objectStore('inputs');
+                
+                let item = {
+                    id: 'photo',
+                    value: reader.result
+                };
+
+                store.put(item);
+            };
+
+            reader.readAsDataURL(photo);
+        }
+
+        function loadFromIndexedDB() {
+            let tx = db.transaction(['inputs'], 'readonly');
+            let store = tx.objectStore('inputs');
+
+            let request1 = store.get('input1');
+            let request2 = store.get('input2');
+            let request3 = store.get('photo');
+
+            request1.onsuccess = function(e) {
+                document.getElementById('input1').value = e.target.result ? e.target.result.value : '';
+            };
+
+            request2.onsuccess = function(e) {
+                document.getElementById('input2').value = e.target.result ? e.target.result.value : '';
+            };
+
+            request3.onsuccess = function(e) {
+                document.getElementById('photoDisplay').src = e.target.result ? e.target.result.value : '';
+            };
+        }
+    </script>
+</head>
+<body>
+    <h1>Test IndexedDB</h1>
+
+    <label for="input1">Input 1:</label><br>
+    <input type="text" id="input1"><br>
+    <label for="input2">Input 2:</label><br>
+    <input type="text" id="input2"><br>
+    <label for="photo">Photo:</label><br>
+    <input type="file" id="photo"><br>
+
+    <button onclick="saveToIndexedDB()">Save to IndexedDB</button>
+    <button onclick="loadFromIndexedDB()">Load from IndexedDB</button>
+
+    <h2>Saved Photo</h2>
+    <img id="photoDisplay">
+</body>
+</html>
